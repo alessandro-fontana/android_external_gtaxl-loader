@@ -19,6 +19,8 @@
  *   - androidboot.mode=charger on a cold start (RST_STAT) with the charger
  *     as the PMIC's power-on source. S-BOOT's own "charger" also covers a
  *     power-key start with the cable in and warm reboots after it;
+ *   - the panel fitted on this tablet, one of three, from the lcdtype
+ *     S-BOOT reads off the panel, as the compatible of the panel node;
  *   - the Wi-Fi and Bluetooth addresses of this tablet, read-only from
  *     Samsung's EFS, into the DTB, so one image serves every tablet;
  *   - an entropy seed: the one Android keeps in the vendor space of misc
@@ -143,6 +145,52 @@ static const char *sboot_bootargs(const void *fdt)
 	if (node < 0)
 		return NULL;
 	return fdt_getprop(fdt, node, "bootargs", &len);
+}
+
+/*
+ * The tablet ships with one of three panels on the HX8279-D. S-BOOT reads
+ * the panel id and passes it as lcdtype, the stock kernel picks the init
+ * table from its last byte, and so does the panel driver from the
+ * compatible. The DTB describes the BOE panel, id 0x00.
+ */
+static const struct {
+	unsigned char id;
+	const char compatible[40];
+} panels[] = {
+	{ 0x01, "chunghwa,hx8279d-gtaxl\0himax,hx8279" },
+	{ 0x03, "boe,hx8279d-gtaxl-v2\0himax,hx8279" },
+};
+
+static void set_panel(void *fdt, const char *sargs)
+{
+	unsigned long lcdtype = 0;
+	char val[16];
+	const char *c;
+	size_t i;
+	int node;
+
+	node = fdt_node_offset_by_compatible(fdt, -1, "boe,hx8279d-gtaxl");
+	if (node < 0)
+		return;
+	if (!sargs || cmdline_get(sargs, "lcdtype", val, sizeof(val)) <= 0) {
+		loader_log("lcdtype", 0);
+		return;
+	}
+	for (c = val; *c >= '0' && *c <= '9'; c++)
+		lcdtype = lcdtype * 10 + (*c - '0');
+	if ((lcdtype & 0xff) == 0x00)
+		return;
+	loader_log("lcdtype", lcdtype);
+	for (i = 0; i < sizeof(panels) / sizeof(panels[0]); i++) {
+		const char *p = panels[i].compatible;
+
+		if ((lcdtype & 0xff) != panels[i].id)
+			continue;
+		/* two strings: the panel and the DriverIC fallback */
+		fdt_setprop(fdt, node, "compatible", p,
+			    strlen(p) + 1 + strlen(p + strlen(p) + 1) + 1);
+		return;
+	}
 }
 
 /* Cold start with the charger as power-on source */
@@ -354,6 +402,7 @@ void __attribute__((noreturn)) loader_main(const void *sboot_fdt)
 			       (unsigned long)(base + p->ramdisk_off + p->ramdisk_size));
 	if (err)
 		fail(p);
+	set_panel(fdt, sargs);
 	set_addresses(fdt);
 	set_seed(fdt, t_entry, val);
 	/* the properties added above move the nodes: look /chosen up again */

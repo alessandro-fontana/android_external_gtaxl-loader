@@ -15,6 +15,8 @@ kernel, the DTB, the ramdisk and the command line. The device tree
 - takes `androidboot.serialno` from S-BOOT's command line;
 - adds `androidboot.mode=charger` when the cable switched the tablet on
   (cold start and PMIC power-on source, read over HSI2C);
+- sets the compatible of the panel node to the panel fitted on the tablet,
+  one of three, from the `lcdtype` S-BOOT reads off the panel;
 - reads the Wi-Fi and Bluetooth addresses of the tablet from Samsung's EFS,
   read-only, and puts them in the DTB;
 - passes an entropy seed (the one Android keeps in the vendor space of
@@ -23,7 +25,8 @@ kernel, the DTB, the ramdisk and the command line. The device tree
   and leaves the ramdisk in place;
 - goes to the recovery when the payload is bad or the partition table has no
   `super`;
-- leaves any error in `/chosen/gtaxl,loader-log`.
+- leaves any error, and the `lcdtype` of a panel other than the default
+  one, in `/chosen/gtaxl,loader-log`.
 
 ## Payload
 
