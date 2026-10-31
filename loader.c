@@ -21,6 +21,8 @@
  *     power-key start with the cable in and warm reboots after it;
  *   - the panel fitted on this tablet, one of three, from the lcdtype
  *     S-BOOT reads off the panel, as the compatible of the panel node;
+ *   - the CPU and GPU voltages of this chip, from its ASV fuses and the
+ *     ECT S-BOOT leaves in RAM, as the stock kernel picks them (asv.c);
  *   - the Wi-Fi and Bluetooth addresses of this tablet, read-only from
  *     Samsung's EFS, into the DTB, so one image serves every tablet;
  *   - an entropy seed: the one Android keeps in the vendor space of misc
@@ -403,6 +405,7 @@ void __attribute__((noreturn)) loader_main(const void *sboot_fdt)
 	if (err)
 		fail(p);
 	set_panel(fdt, sargs);
+	set_asv(fdt);
 	set_addresses(fdt);
 	set_seed(fdt, t_entry, val);
 	/* the properties added above move the nodes: look /chosen up again */

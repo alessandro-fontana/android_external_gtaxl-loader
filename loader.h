@@ -30,6 +30,7 @@ struct payload {
 
 int mmu_enable(void);
 int pmic_read(unsigned char chip, unsigned char reg, unsigned char *val);
+void set_asv(void *fdt);
 int emmc_read(unsigned long lba, unsigned int n, void *buf);
 int gpt_find(const char *name, unsigned long *first, unsigned long *count);
 long ext4_read_file(unsigned long part, const char *path, void *buf, unsigned int len);

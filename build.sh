@@ -23,7 +23,7 @@ CFLAGS=(--target=aarch64-none-elf -ffreestanding -fno-builtin -nostdinc
 	-fno-stack-protector -fno-asynchronous-unwind-tables -ffunction-sections
 	-DLOADER_VERSION="\"$VERSION\"")
 objs=()
-for src in "$HERE"/start.S "$HERE"/loader.c "$HERE"/mmu.c "$HERE"/lz4.c "$HERE"/pmic.c "$HERE"/emmc.c "$HERE"/ext4.c "$HERE"/sha256.c "$HERE"/libc.c \
+for src in "$HERE"/start.S "$HERE"/loader.c "$HERE"/mmu.c "$HERE"/lz4.c "$HERE"/pmic.c "$HERE"/emmc.c "$HERE"/ext4.c "$HERE"/sha256.c "$HERE"/asv.c "$HERE"/libc.c \
 	"$FDT"/fdt.c "$FDT"/fdt_ro.c "$FDT"/fdt_rw.c "$FDT"/fdt_wip.c; do
 	o=$T/$(basename "$src").o
 	extra=()

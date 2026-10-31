@@ -17,6 +17,9 @@ kernel, the DTB, the ramdisk and the command line. The device tree
   (cold start and PMIC power-on source, read over HSI2C);
 - sets the compatible of the panel node to the panel fitted on the tablet,
   one of three, from the `lcdtype` S-BOOT reads off the panel;
+- sets the CPU and GPU voltages of the chip, from its ASV fuses and the ECT
+  S-BOOT leaves in RAM, as the stock kernel does, and records the fuses in
+  `/chosen/gtaxl,asv-fuses`;
 - reads the Wi-Fi and Bluetooth addresses of the tablet from Samsung's EFS,
   read-only, and puts them in the DTB;
 - passes an entropy seed (the one Android keeps in the vendor space of
@@ -51,6 +54,7 @@ Android build runs it from `external/gtaxl-loader`.
 | `lz4.c` | LZ4 legacy frame decoder |
 | `pmic.c` | power-on source from the S2MPU05 PMIC over HSI2C |
 | `emmc.c`, `ext4.c` | read-only eMMC (DW-MMC, IDMAC) and ext4, for the EFS |
+| `asv.c` | per-chip CPU and GPU voltages from the ASV fuses and the ECT |
 | `sha256.c` | entropy seed hashing |
 | `libc.c`, `include/` | the few libc functions needed |
 
